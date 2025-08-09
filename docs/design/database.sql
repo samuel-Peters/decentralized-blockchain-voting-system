@@ -66,9 +66,11 @@ BEGIN
     SELECT COUNT(*) INTO vote_count
     FROM Vote
     WHERE voter_id = NEW.voter_id
-    AND candidate_id IN (
+    AND candidate_id IN
+    (
         SELECT candidate_id FROM Candidate
-        WHERE election_id = (
+        WHERE election_id =
+        (
         SELECT election_id FROM Candidate WHERE candidate_id = NEW.candidate_id
         )
     );
@@ -353,7 +355,8 @@ BEGIN
     DECLARE election_end DATE;
     SELECT start_date, end_date INTO election_start, election_end
     FROM Election
-    WHERE election_id = (
+    WHERE election_id =
+    (
         SELECT election_id FROM Candidate WHERE candidate_id = NEW.candidate_id
     );
     IF NEW.timestamp < election_start OR NEW.timestamp > election_end THEN
@@ -402,15 +405,21 @@ BEGIN
     FROM Vote
     WHERE voter_id = NEW.voter_id
     AND candidate_id = NEW.candidate_id
-    AND timestamp >= (
+    AND timestamp >= 
+    (
         SELECT start_date FROM Election WHERE election_id = (
-            SELECT election_id FROM Candidate WHERE candidate_id = NEW.candidate_id
+        SELECT election_id FROM Candidate WHERE candidate_id = NEW.candidate_id
         )
     )
-    AND timestamp <= (
-        SELECT end_date FROM Election WHERE election_id = (
-            SELECT election_id FROM Candidate WHERE candidate_id = NEW.candidate_id
+    AND timestamp <= 
+    (
+        SELECT end_date FROM Election WHERE election_id = 
+        (
+        SELECT election_id FROM Candidate WHERE candidate_id = NEW.candidate_id
         )
     );
     IF already_voted > 0 THEN
-        SIGNAL SQLSTATE
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Voter has already voted for this candidate in the current election';
+    END IF;
+END;
+//
