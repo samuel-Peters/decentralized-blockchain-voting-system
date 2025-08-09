@@ -405,15 +405,15 @@ BEGIN
     FROM Vote
     WHERE voter_id = NEW.voter_id
     AND candidate_id = NEW.candidate_id
-    AND timestamp >= 
+    AND timestamp >=
     (
         SELECT start_date FROM Election WHERE election_id = (
         SELECT election_id FROM Candidate WHERE candidate_id = NEW.candidate_id
         )
     )
-    AND timestamp <= 
+    AND timestamp <=
     (
-        SELECT end_date FROM Election WHERE election_id = 
+        SELECT end_date FROM Election WHERE election_id =
         (
         SELECT election_id FROM Candidate WHERE candidate_id = NEW.candidate_id
         )
